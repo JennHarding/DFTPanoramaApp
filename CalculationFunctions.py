@@ -3,7 +3,7 @@ from music21 import stream, note, pitch, chord, meter, corpus, converter
 from math import pi
 
 import Corpus
-import DFT_MyClasses as MC
+import dftArrayClass as dft_array
 
 
 def quantize_list(unit, quant, angle):
@@ -126,7 +126,7 @@ def sliding_window(score, beat_offset_list, window_size, strategy, unit, log=Tru
                     note_=elem, 
                     strategy=strategy)
 
-        all_arrays.append(MC.MultiSetArray(
+        all_arrays.append(dft_array(
             array=array, 
             log_weight=log, 
             measure_range=(measure1, measure2), 
