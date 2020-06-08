@@ -13,8 +13,8 @@ from pandastable import Table, TableModel
 import pandas as pd
 
 from Corpus import full_corpus
-from DFT_ScoreToDFT import score_to_data
-import DFT_Visuals as vis
+from CalculationFunctions import score_to_data
+import visuals as vis
 
 LARGE_FONT = ("Verdana", 16)
 NORMAL_FONT = ("Verdana", 10)
