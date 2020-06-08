@@ -1,12 +1,12 @@
 
 from music21 import stream, note, pitch, chord, meter, corpus, converter
-from math import pi
+import numpy as np
 
-import Corpus
+import Corpus as Corpus
 from dftArrayClass import dft_array
 
 
-def parse_score(score_string, measure_nums):
+def parse_score(score_string, measure_nums=None):
     if score_string in Corpus.music21_corpus:
         working_score = corpus.parse(score_string)
     elif score_string in Corpus.mozSQs:
@@ -22,10 +22,14 @@ def parse_score(score_string, measure_nums):
     elif score_string in Corpus.elvis_corpus:
         working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
     
-    if measure_nums == (0,0):
+    if measure_nums == (0, 0):
         return working_score
     else:
         return working_score.measures(measure_nums[0], measure_nums[1])
+    # if measure_nums:
+    #     return working_score.measures(measure_nums[0], measure_nums[1])
+    # else:
+    #     return working_score
 
 
 def split_time_signature(numerator):
@@ -41,11 +45,10 @@ def convert_time_signature(ts):
     ms = meter.MeterSequence(ts.ratioString)
     if ms.numerator in [2, 3, 4]:
         ms.partitionByCount(ms.numerator)
-        return ms
     else:
         partition_list = split_time_signature(ts.numerator)
         ms.partitionByList(partition_list)
-        return ms
+    return ms
 
 
 def get_beat_offsets_from_score(score):
@@ -89,7 +92,7 @@ def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo
     all_arrays = []
     for idx, window_begin in enumerate(beat_offset_list[:-window_size]):
         window_end = beat_offset_list[idx + window_size]
-        array = [0]*edo
+        current_array = np.array([0.0]*edo)
         measure1 = get_measure_number(score=score, offset=window_begin)
         
         if window_end == beat_offset_list[-1]:
@@ -104,18 +107,18 @@ def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo
             
             if isinstance(elem, chord.Chord):
                 for a in elem.notes:
-                    array = update_array(
-                        array=array, 
+                    current_array = update_array(
+                        array=current_array, 
                         note_=a, 
                         strategy=strategy)
             elif isinstance(elem, note.Note):
-                array = update_array(
-                    array=array, 
+                current_array = update_array(
+                    array=current_array, 
                     note_=elem, 
                     strategy=strategy)
 
         all_arrays.append(dft_array(
-            array=array, 
+            array=current_array, 
             log_weight=log, 
             measure_range=(measure1, measure2)))
         
@@ -126,14 +129,12 @@ def score_to_data(config):
      
     repertoire, excerpt, measures, window, strat, log = config
     parsed_score = parse_score(score_string=repertoire, measure_nums=measures)
-    # parsed_score.show('musicxml')
     beat_offset_list = get_beat_offsets_from_score(score=parsed_score.parts[0])
 
     if strat == "Duration" or strat == "Flat":
         adjusted_score = parsed_score.sliceByBeat(addTies=False)
     else:
         adjusted_score = parsed_score.stripTies(retainContainers=True)
-    # adjusted_score.show('musicxml')
     
     multisets = sliding_window(
         score=adjusted_score, 
