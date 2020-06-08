@@ -2,7 +2,7 @@
 from music21 import stream, note, pitch, chord, meter, corpus, converter
 from math import pi
 
-import DFT_Corpus as Corpus
+import Corpus
 import DFT_MyClasses as MC
 
 
