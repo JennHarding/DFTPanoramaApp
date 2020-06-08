@@ -3,22 +3,10 @@ from music21 import stream, note, pitch, chord, meter, corpus, converter
 from math import pi
 
 import Corpus
-import dftArrayClass as dft_array
+from dftArrayClass import dft_array
 
 
-def quantize_list(unit, quant, angle):
-      if unit == "Degrees":
-          spacing = 360 / quant
-
-      if unit == "Radians":
-          spacing = (2 * pi) / quant
-      q = angle/spacing
-      q = round(q)
-      
-      return q * spacing
-  
-
-def parse_score(score_string, excerpt=False):
+def parse_score(score_string, measure_nums):
     if score_string in Corpus.music21_corpus:
         working_score = corpus.parse(score_string)
     elif score_string in Corpus.mozSQs:
@@ -34,10 +22,10 @@ def parse_score(score_string, excerpt=False):
     elif score_string in Corpus.elvis_corpus:
         working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
     
-    if excerpt:
-        return working_score.measures(excerpt[0], excerpt[1])
-    else:
+    if measure_nums == (0,0):
         return working_score
+    else:
+        return working_score.measures(measure_nums[0], measure_nums[1])
 
 
 def split_time_signature(numerator):
@@ -97,7 +85,7 @@ def get_measure_number(score, offset):
     return measure_number
     
     
-def sliding_window(score, beat_offset_list, window_size, strategy, unit, log=True, edo=12):
+def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo=12):
     all_arrays = []
     for idx, window_begin in enumerate(beat_offset_list[:-window_size]):
         window_end = beat_offset_list[idx + window_size]
@@ -129,16 +117,15 @@ def sliding_window(score, beat_offset_list, window_size, strategy, unit, log=Tru
         all_arrays.append(dft_array(
             array=array, 
             log_weight=log, 
-            measure_range=(measure1, measure2), 
-            unit=unit))
+            measure_range=(measure1, measure2)))
         
     return all_arrays
 
 
 def score_to_data(config):  
      
-    repertoire, excerpt, window, strat, log, quant, unit = config
-    parsed_score = parse_score(score_string=repertoire, excerpt=excerpt)
+    repertoire, excerpt, measures, window, strat, log = config
+    parsed_score = parse_score(score_string=repertoire, measure_nums=measures)
     # parsed_score.show('musicxml')
     beat_offset_list = get_beat_offsets_from_score(score=parsed_score.parts[0])
 
@@ -153,7 +140,6 @@ def score_to_data(config):
         beat_offset_list=beat_offset_list, 
         window_size=window, 
         strategy=strat, 
-        log=log, 
-        unit=unit)
+        log=log)
 
     return multisets

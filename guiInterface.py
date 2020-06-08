@@ -23,10 +23,6 @@ style.use("ggplot")
 score_data = "none"
 master_df = "none"
 
-
-
-
-
 def popupmsg(msg):
     popup = tk.Tk()
     popup.wm_title("!")
@@ -44,7 +40,6 @@ class PanoramaGenerator(tk.Tk):
     
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-        tk.Tk.iconbitmap(self, default="Books.ico")
         tk.Tk.wm_title(self, "DFT Panorama Generator")
         
         container = tk.Frame(self)
