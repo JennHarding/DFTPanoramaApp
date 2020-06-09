@@ -43,7 +43,7 @@ class PanoramaGenerator(tk.Tk):
         tk.Tk.wm_title(self, "DFT Panorama Generator")
         
         container = tk.Frame(self)
-        container.grid(sticky="nsew")
+        container.grid(row=0, column=0, sticky="nsew")
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
         
@@ -86,7 +86,7 @@ class StartPage(tk.Frame):
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="Jenn's Panorama Generator. USE AT YOUR OWN RISK", font=LARGE_FONT)
+        label = tk.Label(self, text="DFT Panorama Generator.", font=LARGE_FONT)
         label.grid(row=0, column=0, columnspan=5)
 
         rep_label = ttk.Label(self, text="Select Repertoire")
@@ -94,6 +94,7 @@ class StartPage(tk.Frame):
         rep = tk.StringVar()
         rep_select = ttk.OptionMenu(self, rep, *full_corpus)
         rep_select.grid(row=1, column=1, columnspan=3, sticky="we", pady=20)
+             
         
         def switch():
             if beg_select["state"] == tk.DISABLED:
@@ -166,8 +167,8 @@ class MagnitudePage(tk.Frame):
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="All Fourier Magnitudes", font=LARGE_FONT)
-        label.grid(row=0, column=1, columnspan=3)
+        # label = tk.Label(self, text="All Fourier Magnitudes", font=LARGE_FONT)
+        # label.grid(row=0, column=1, columnspan=3)
         self.make_empty_graph()
         self.make_empty_dataframe()
         
@@ -240,7 +241,7 @@ class ComponentPage(tk.Frame):
                
         for i in range(1, 7):
             comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
-            comp_button.grid(row=(i-1)%3, column=(i-1)//3)
+            comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
         
     def make_empty_graph(self):
         fig = Figure(figsize=(10,2.5))
@@ -258,7 +259,7 @@ class ComponentPage(tk.Frame):
         toolbar.pack()
                
         graph_button = ttk.Button(self, text="Generate Graph", command=lambda: self.make_component_graph(canvas=canvas, left=sub_left, right=sub_right))
-        graph_button.grid(row=0, column=2)
+        graph_button.grid(row=0, column=0, sticky = "w")
 
     def make_component_graph(self, canvas, left, right):
         global master_df
@@ -299,7 +300,7 @@ class ComponentPage(tk.Frame):
         pt.show()
         
         df_button = ttk.Button(self, text="Show Component Data", command=lambda: self.make_component_data(table=pt))
-        df_button.grid(row=1, column=2)
+        df_button.grid(row=1, column=0, sticky = "w")
         
         
     def make_component_data(self, table):

@@ -2,25 +2,27 @@
 from music21 import stream, note, pitch, chord, meter, corpus, converter
 import numpy as np
 
-import Corpus as Corpus
+import Corpus
 from dftArrayClass import dft_array
 
 
 def parse_score(score_string, measure_nums=None):
-    if score_string in Corpus.music21_corpus:
-        working_score = corpus.parse(score_string)
-    elif score_string in Corpus.mozSQs:
-        working_score = converter.parse(Corpus.corpus+Corpus.moz+score_string)
-    elif score_string in Corpus.harbs:
-        working_score = converter.parse(Corpus.corpus+Corpus.harb+score_string)
-    elif score_string in Corpus.mess_misc:
-        working_score = converter.parse(Corpus.corpus+Corpus.mess+score_string)
-    elif score_string in Corpus.meis:
-        working_score = converter.parse(Corpus.corpus+Corpus.mei+score_string)
-    elif score_string in Corpus.tests:
-        working_score = converter.parse(Corpus.corpus+Corpus.test+score_string)
-    elif score_string in Corpus.elvis_corpus:
-        working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
+    # if score_string in Corpus.music21_corpus:
+    #     working_score = corpus.parse(score_string)
+    # elif score_string in Corpus.mozSQs:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.moz+score_string)
+    # elif score_string in Corpus.harbs:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.harb+score_string)
+    # elif score_string in Corpus.mess_misc:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.mess+score_string)
+    # elif score_string in Corpus.meis:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.mei+score_string)
+    # elif score_string in Corpus.tests:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.test+score_string)
+    # elif score_string in Corpus.elvis_corpus:
+    #     working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
+    if score_string in Corpus.CRIM:
+        working_score = converter.parse(Corpus.CRIM_corpus + score_string)
     
     if measure_nums == (0, 0):
         return working_score

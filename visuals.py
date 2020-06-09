@@ -42,7 +42,7 @@ def make_dataframes(score_data):
     general_info = {'Window Number' : [x for x in range(1, len(score_data) + 1)],
          'Weighted Array' : [str(a.rounded_weighted_array()) for a in score_data],
          'Original Array' : [str(a.rounded_original_array()) for a in score_data],
-         'Measure Range' : [f'mm. {a.start_measure}â€“{a.end_measure}' for a in score_data]
+         'Measure Range' : [f'mm. {a.start_measure}–“{a.end_measure}' for a in score_data]
          }
 
     phases = {f'f{i} Phase' : [a.phase_dict()[f'f{i}'] for a in score_data] for i in range(1, 7)}
