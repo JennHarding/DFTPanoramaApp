@@ -197,20 +197,28 @@ class DataPage(tk.Frame):
         
     def make_graph(self, canvas, sub, left, right):
         global master_df
+        sub.clear()
         left.clear()
         right.clear()
         i = self.var.get()
         
         if i == 7:
             for i in range(1, 7):
-                sub.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
+                left.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                         master_df[f'f{i} Magnitude'], 
                         color=vis.xkcd_colors[f'f{i}_colors'][0],
                         alpha=0.4,
                         labels=[f'f{i} Magnitude'])
-                sub.margins(x=0) 
+                left.margins(x=0) 
 
-            sub.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
+            left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
+            left.set_ylabel("Magnitude")
+            right.grid(b=False)
+            right.margins(x=0)
+            right.tick_params(axis='y', length=0)
+            right.set_yticklabels([])
+            
+            
         
         else:
             right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
@@ -220,6 +228,7 @@ class DataPage(tk.Frame):
                     labels=[f'f{i} Magnitude'])
             right.grid(b=False)
             right.margins(x=0) 
+            right.set_ylabel("Magnitude")
             
             left.plot(range(len(master_df[f'f{i} Phase'])),
                     master_df[f'f{i} Phase'],
@@ -234,6 +243,8 @@ class DataPage(tk.Frame):
             left.set_yticks(ticks=range(-180,210,30))
             left.grid(axis='x')
             left.margins(x=0)
+            left.set_ylabel("Phase")
+            left.set_xlabel("Window")
 
             left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=2)
         canvas.draw()
