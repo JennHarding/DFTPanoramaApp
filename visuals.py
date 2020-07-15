@@ -42,14 +42,14 @@ def make_dataframes(score_data):
     general_info = {'Window Number' : [x for x in range(1, len(score_data) + 1)],
          'Weighted Array' : [str(a.rounded_weighted_array()) for a in score_data],
          'Original Array' : [str(a.rounded_original_array()) for a in score_data],
-         'Measure Range' : [f'mm. {a.start_measure}–“{a.end_measure}' for a in score_data]
+         'Measure Range' : [f'{a.start_measure}–{a.end_measure}' for a in score_data]
          }
 
-    phases = {f'f{i} Phase' : [a.phase_dict()[f'f{i}'] for a in score_data] for i in range(1, 7)}
+    phases = {f'f{i} Phase' : [np.around(a.phase_dict()[f'f{i}']) for a in score_data] for i in range(1, 7)}
     phases['f6 Phase'] = [180 if x < -179 else x for x in phases['f6 Phase']]
-    quantized_phases = {f'f{i} Quantized Phase' : [quantize_array(a.phase_dict()[f'f{i}']) for a in score_data] for i in range(1, 7)}
+    quantized_phases = {f'f{i} Quantized Phase' : [np.around(quantize_array(a.phase_dict()[f'f{i}'])) for a in score_data] for i in range(1, 7)}
     quantized_phases['f6 Quantized Phase'] = [180 if x < -179 else x for x in quantized_phases['f6 Quantized Phase']]
-    magnitudes = {f'f{i} Magnitude' : [a.mag_dict()[f'f{i}'] for a in score_data] for i in range(1, 7)}
+    magnitudes = {f'f{i} Magnitude' : [np.around(a.mag_dict()[f'f{i}'], decimals=2) for a in score_data] for i in range(1, 7)}
 
     master_dict = {**general_info, **phases, **quantized_phases, **magnitudes}
 

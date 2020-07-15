@@ -49,14 +49,12 @@ class PanoramaGenerator(tk.Tk):
         
         menubar = tk.Menu(container)
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Save settings", command=lambda : popupmsg("Not functional yet!"))
-        filemenu.add_separator()
         filemenu.add_command(label="Exit", command=quit)
         menubar.add_cascade(label="File", menu=filemenu)
         
         goto_menu = tk.Menu(menubar, tearoff=1)
         goto_menu.add_command(label="Home", command=lambda: self.show_frame(StartPage))
-        goto_menu.add_command(label="Magnitudes", command=lambda: self.show_frame(MagnitudePage))
+        goto_menu.add_command(label="Data", command=lambda: self.show_frame(DataPage))
         goto_menu.add_command(label="Individual Components", command=lambda: self.show_frame(ComponentPage))
         menubar.add_cascade(label="Go To", menu=goto_menu)
         
@@ -65,7 +63,7 @@ class PanoramaGenerator(tk.Tk):
         
         self.frames = {}
         
-        for F in (StartPage, MagnitudePage, ComponentPage):
+        for F in (StartPage, DataPage, ComponentPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -86,7 +84,7 @@ class StartPage(tk.Frame):
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        label = tk.Label(self, text="DFT Panorama Generator.", font=LARGE_FONT)
+        label = tk.Label(self, text="DFT Panorama Generator", font=LARGE_FONT)
         label.grid(row=0, column=0, columnspan=5)
 
         rep_label = ttk.Label(self, text="Select Repertoire")
@@ -163,89 +161,25 @@ class StartPage(tk.Frame):
               
         
 
-class MagnitudePage(tk.Frame):
+class DataPage(tk.Frame):
     
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
-        # label = tk.Label(self, text="All Fourier Magnitudes", font=LARGE_FONT)
-        # label.grid(row=0, column=1, columnspan=3)
         self.make_empty_graph()
         self.make_empty_dataframe()
+        
+        self.var = tk.IntVar()
+               
+        for i in range(1, 7):
+            comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
+            comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
+        mag_button = ttk.Radiobutton(self, text='Magnitudes', variable=self.var, value=7)
+        mag_button.grid(row=0, column=5)
         
         
     def make_empty_graph(self):
         fig = Figure(figsize=(10,2.5))
         sub = fig.add_subplot(111)
-        
-        canvas = FigureCanvasTkAgg(fig, self)
-        canvas.draw()
-        canvas.get_tk_widget()
-        canvas.get_tk_widget().grid(row=3, column=0, sticky="we", columnspan=3)
-        
-        toolbar_frame = tk.Frame(self)
-        toolbar_frame.grid(row=2, column=0, sticky="w")
-        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
-        toolbar.pack()
-        
-        graph_button = ttk.Button(self, text="Generate Graph", command=lambda: self.make_mag_graph(canvas=canvas, sub=sub))
-        graph_button.grid(row=0, column=0, sticky="w")
-        
-    def make_mag_graph(self, canvas, sub):
-        global master_df
-        sub.clear()
-        for i in range(1, 7):
-            sub.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
-                    master_df[f'f{i} Magnitude'], 
-                    color=vis.xkcd_colors[f'f{i}_colors'][0],
-                    alpha=0.4,
-                    labels=[f'f{i} Magnitude'])
-            sub.margins(x=0) 
-
-        # sub.legend(loc="center left", bbox_to_anchor=(1, 0.5), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7})
-        sub.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
-        canvas.draw()
-        
-        
-
-    def make_empty_dataframe(self):
-        empty_df = pd.DataFrame({})
-        frame = tk.Frame(self)
-        frame.grid(row=4, column=0, sticky="we", columnspan=3)
-        pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
-        pt.show()
-        
-        df_button = ttk.Button(self, text="Show Magnitude Data", command=lambda: self.make_mag_data(table=pt))
-        df_button.grid(row=1, column=0, sticky="w")       
-        
-        
-    def make_mag_data(self, table):
-        global master_df
-        df = table.model.df
-        df['Window Number'] = master_df['Window Number']
-        df['Measure Range'] = master_df['Measure Range']
-        df['Original Array'] = master_df['Original Array']
-        for i in range(1, 7):
-            df[f'f{i}'] = master_df[f'f{i} Magnitude']
-        pd.set_option('display.max_colwidth', 40)
-        table.redraw()
-        
-
-class ComponentPage(tk.Frame):
-    
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        
-        self.var = tk.IntVar()
-        self.make_empty_graph()
-        self.make_empty_dataframe()
-               
-        for i in range(1, 7):
-            comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
-            comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
-        
-    def make_empty_graph(self):
-        fig = Figure(figsize=(10,2.5))
-        sub_left = fig.add_subplot(111)
         sub_right = sub_left.twinx()
         
         canvas = FigureCanvasTkAgg(fig, self)
@@ -257,64 +191,92 @@ class ComponentPage(tk.Frame):
         toolbar_frame.grid(row=3, column=0, sticky="w", columnspan=7)
         toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
         toolbar.pack()
-               
-        graph_button = ttk.Button(self, text="Generate Graph", command=lambda: self.make_component_graph(canvas=canvas, left=sub_left, right=sub_right))
-        graph_button.grid(row=0, column=0, sticky = "w")
-
-    def make_component_graph(self, canvas, left, right):
+        
+        graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_mag_graph(canvas=canvas, sub=sub))
+        graph_button.grid(row=0, column=0, sticky="w")
+        
+    def make_graph(self, canvas, sub):
         global master_df
         left.clear()
         right.clear()
         i = self.var.get()
-        right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
+        
+        if i == 7:
+            for i in range(1, 7):
+                sub.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
+                        master_df[f'f{i} Magnitude'], 
+                        color=vis.xkcd_colors[f'f{i}_colors'][0],
+                        alpha=0.4,
+                        labels=[f'f{i} Magnitude'])
+                sub.margins(x=0) 
+
+
+            sub.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
+            canvas.draw()
+        
+        else:
+            right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                     master_df[f'f{i} Magnitude'], 
                     color=vis.xkcd_colors[f'f{i}_colors'][0],
                     alpha=0.3,
                     labels=[f'f{i} Magnitude'])
-        right.grid(b=False)
-        right.margins(x=0) 
-        
-        left.plot(range(len(master_df[f'f{i} Phase'])),
-                   master_df[f'f{i} Phase'],
-                   color=vis.xkcd_colors[f'f{i}_colors'][1],
-                   label=f'f{i} Phase',
-                   )
-        left.plot(range(len(master_df[f'f{i} Quantized Phase'])),
-                   master_df[f'f{i} Quantized Phase'],
-                   color=vis.xkcd_colors[f'f{i}_colors'][2],
-                   label=f'f{i} Quantized Phase',
-                   )
-        left.set_yticks(ticks=range(-180,210,30))
-        left.grid(axis='x')
-        left.margins(x=0)
+            right.grid(b=False)
+            right.margins(x=0) 
+            
+            left.plot(range(len(master_df[f'f{i} Phase'])),
+                    master_df[f'f{i} Phase'],
+                    color=vis.xkcd_colors[f'f{i}_colors'][1],
+                    label=f'f{i} Phase',
+                    )
+            left.plot(range(len(master_df[f'f{i} Quantized Phase'])),
+                    master_df[f'f{i} Quantized Phase'],
+                    color=vis.xkcd_colors[f'f{i}_colors'][2],
+                    label=f'f{i} Quantized Phase',
+                    )
+            left.set_yticks(ticks=range(-180,210,30))
+            left.grid(axis='x')
+            left.margins(x=0)
 
-        left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=2)
-        canvas.draw()
-    
-    
+            left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=2)
+            canvas.draw()
+            
+        
+        
+
     def make_empty_dataframe(self):
         empty_df = pd.DataFrame({})
         frame = tk.Frame(self)
-        frame.grid(row=5, column=0, columnspan=7, sticky="we")
+        frame.grid(row=5, column=0, sticky="we", columnspan=7)
         pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
         pt.show()
         
-        df_button = ttk.Button(self, text="Show Component Data", command=lambda: self.make_component_data(table=pt))
-        df_button.grid(row=1, column=0, sticky = "w")
+        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_mag_data(table=pt))
+        df_button.grid(row=1, column=0, sticky="w")       
         
         
-    def make_component_data(self, table):
+    def make_mag_data(self, table):
         global master_df
         i = self.var.get()
-        df = table.model.df
-        df['Window Number'] = master_df['Window Number']
-        df['Measures'] = master_df['Measure Range']
-        df['Original Array'] = master_df['Original Array']
-        df['Magnitude'] = master_df[f'f{i} Magnitude']
-        df['Phase'] = master_df[f'f{i} Phase']
-        df['Quantized Phase'] = master_df[f'f{i} Quantized Phase']
-    
-        table.redraw()
+        
+        if i == 7:
+            df = table.model.df
+            df['Window Number'] = master_df['Window Number']
+            df['Measure Range'] = master_df['Measure Range']
+            df['Original Array'] = master_df['Original Array']
+            for i in range(1, 7):
+                df[f'f{i}'] = master_df[f'f{i} Magnitude']
+            pd.set_option('display.max_colwidth', 40)
+            table.redraw()
+            
+        else:
+            df = table.model.df
+            df['Window Number'] = master_df['Window Number']
+            df['Measures'] = master_df['Measure Range']
+            df['Original Array'] = master_df['Original Array']
+            df['Magnitude'] = master_df[f'f{i} Magnitude']
+            df['Phase'] = master_df[f'f{i} Phase']
+            df['Quantized Phase'] = master_df[f'f{i} Quantized Phase']
+            table.redraw()
 
 
 
