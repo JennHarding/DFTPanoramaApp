@@ -55,7 +55,6 @@ class PanoramaGenerator(tk.Tk):
         goto_menu = tk.Menu(menubar, tearoff=1)
         goto_menu.add_command(label="Home", command=lambda: self.show_frame(StartPage))
         goto_menu.add_command(label="Data", command=lambda: self.show_frame(DataPage))
-        goto_menu.add_command(label="Individual Components", command=lambda: self.show_frame(ComponentPage))
         menubar.add_cascade(label="Go To", menu=goto_menu)
         
         tk.Tk.config(self, menu=menubar)
@@ -63,7 +62,7 @@ class PanoramaGenerator(tk.Tk):
         
         self.frames = {}
         
-        for F in (StartPage, DataPage, ComponentPage):
+        for F in (StartPage, DataPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -174,12 +173,13 @@ class DataPage(tk.Frame):
             comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
             comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
         mag_button = ttk.Radiobutton(self, text='Magnitudes', variable=self.var, value=7)
-        mag_button.grid(row=0, column=5)
+        mag_button.grid(row=0, column=4)
         
         
     def make_empty_graph(self):
         fig = Figure(figsize=(10,2.5))
         sub = fig.add_subplot(111)
+        sub_left = fig.add_subplot(111)
         sub_right = sub_left.twinx()
         
         canvas = FigureCanvasTkAgg(fig, self)
@@ -192,10 +192,10 @@ class DataPage(tk.Frame):
         toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
         toolbar.pack()
         
-        graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_mag_graph(canvas=canvas, sub=sub))
+        graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_graph(canvas=canvas, sub=sub, left=sub_left, right=sub_right))
         graph_button.grid(row=0, column=0, sticky="w")
         
-    def make_graph(self, canvas, sub):
+    def make_graph(self, canvas, sub, left, right):
         global master_df
         left.clear()
         right.clear()
@@ -210,9 +210,7 @@ class DataPage(tk.Frame):
                         labels=[f'f{i} Magnitude'])
                 sub.margins(x=0) 
 
-
             sub.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
-            canvas.draw()
         
         else:
             right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
@@ -238,7 +236,7 @@ class DataPage(tk.Frame):
             left.margins(x=0)
 
             left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=2)
-            canvas.draw()
+        canvas.draw()
             
         
         
@@ -250,33 +248,29 @@ class DataPage(tk.Frame):
         pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
         pt.show()
         
-        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_mag_data(table=pt))
+        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_data(table=pt))
         df_button.grid(row=1, column=0, sticky="w")       
         
         
-    def make_mag_data(self, table):
+    def make_data(self, table):
         global master_df
         i = self.var.get()
+        table.clearTable()
         
+        df = table.model.df
+        df['Window'] = master_df['Window Number']
+        df['Measures'] = master_df['Measure Range']
+        df['Array'] = master_df['Original Array']
         if i == 7:
-            df = table.model.df
-            df['Window Number'] = master_df['Window Number']
-            df['Measure Range'] = master_df['Measure Range']
-            df['Original Array'] = master_df['Original Array']
             for i in range(1, 7):
-                df[f'f{i}'] = master_df[f'f{i} Magnitude']
+                df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             pd.set_option('display.max_colwidth', 40)
-            table.redraw()
             
         else:
-            df = table.model.df
-            df['Window Number'] = master_df['Window Number']
-            df['Measures'] = master_df['Measure Range']
-            df['Original Array'] = master_df['Original Array']
-            df['Magnitude'] = master_df[f'f{i} Magnitude']
+            df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             df['Phase'] = master_df[f'f{i} Phase']
             df['Quantized Phase'] = master_df[f'f{i} Quantized Phase']
-            table.redraw()
+        table.redraw()
 
 
 
