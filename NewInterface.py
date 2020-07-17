@@ -138,6 +138,13 @@ class StartPage(tk.Frame):
         log.set(True)
         log_select = tk.Checkbutton(self, text="Use Log Weighting \n (Recommended)", variable=log)
         log_select.grid(row=6, column=1, pady=20)
+        
+        edo_label = tk.Label(self, text="EDO (max 24)")
+        edo_label.grid(row=7, column=0)
+        edo = tk.IntVar()
+        edo.set(12)
+        edo_select = tk.Entry(self, textvariable=edo)
+        edo_select.grid(row=7, column=1)
 
         
         def calculate_dft():
@@ -156,7 +163,7 @@ class StartPage(tk.Frame):
             
         
         calculate = ttk.Button(self, text="Calculate", command=calculate_dft)
-        calculate.grid(row=7, column=0, columnspan=4, sticky="we")
+        calculate.grid(row=8, column=0, columnspan=4, sticky="we")
               
         
 
@@ -206,7 +213,8 @@ class DataPage(tk.Frame):
             for i in range(1, 7):
                 left.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                         master_df[f'f{i} Magnitude'], 
-                        color=vis.xkcd_colors[f'f{i}_colors'][0],
+                        # color=vis.xkcd_colors[f'f{i}_colors'][0],
+                        color=vis.hex_colors[f'f{i}_colors'][0],
                         alpha=0.4,
                         labels=[f'f{i} Magnitude'])
                 left.margins(x=0) 
@@ -223,7 +231,8 @@ class DataPage(tk.Frame):
         else:
             right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                     master_df[f'f{i} Magnitude'], 
-                    color=vis.xkcd_colors[f'f{i}_colors'][0],
+                    # color=vis.xkcd_colors[f'f{i}_colors'][0],
+                    color=vis.hex_colors[f'f{i}_colors'][0],
                     alpha=0.3,
                     labels=[f'f{i} Magnitude'])
             right.grid(b=False)
@@ -232,12 +241,14 @@ class DataPage(tk.Frame):
             
             left.plot(range(len(master_df[f'f{i} Phase'])),
                     master_df[f'f{i} Phase'],
-                    color=vis.xkcd_colors[f'f{i}_colors'][1],
+                    # color=vis.xkcd_colors[f'f{i}_colors'][1],
+                    color=vis.hex_colors[f'f{i}_colors'][1],
                     label=f'f{i} Phase',
                     )
             left.plot(range(len(master_df[f'f{i} Quantized Phase'])),
                     master_df[f'f{i} Quantized Phase'],
-                    color=vis.xkcd_colors[f'f{i}_colors'][2],
+                    # color=vis.xkcd_colors[f'f{i}_colors'][2],
+                    color=vis.hex_colors[f'f{i}_colors'][2],
                     label=f'f{i} Quantized Phase',
                     )
             left.set_yticks(ticks=range(-180,210,30))

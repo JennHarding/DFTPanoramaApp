@@ -4,14 +4,37 @@ from matplotlib.figure import Figure
 import numpy as np
 
 
+# rgb_colors = {'f1_colors' : ['rgba(130,202,252,0.4)', 'rgba(61,122,253,0.6)', 'rgba(30,72,143,1)'], 
+#               'f2_colors' : ['rgba(255,223,34,0.4)', 'rgba(242,171,21,0.6)', 'rgba(127,78,30,1)'], 
+#               'f3_colors' : ['rgba(99,171,21,0.4)', 'rgba(105,131,57,0.6)', 'rgba(5,71,42,1)'],
+#               'f4_colors' : ['rgba(207,98,117,0.4)', 'rgba(212,106,126,0.6)', 'rgba(117,8,81,1)'], 
+#               'f5_colors' : ['rgba(196,142,253,0.4)', 'rgba(133,103,152,0.6)', 'rgba(67,5,65,1)'], 
+#               'f6_colors' : ['rgba(211,182,131,0.4)', 'rgba(127,104,78,0.6)', 'rgba(65,2,0,1)']}
 
-
-rgb_colors = {'f1_colors' : ['rgba(130,202,252,0.4)', 'rgba(61,122,253,0.6)', 'rgba(30,72,143,1)'], 
-              'f2_colors' : ['rgba(255,223,34,0.4)', 'rgba(242,171,21,0.6)', 'rgba(127,78,30,1)'], 
-              'f3_colors' : ['rgba(99,171,21,0.4)', 'rgba(105,131,57,0.6)', 'rgba(5,71,42,1)'],
-              'f4_colors' : ['rgba(207,98,117,0.4)', 'rgba(212,106,126,0.6)', 'rgba(117,8,81,1)'], 
-              'f5_colors' : ['rgba(196,142,253,0.4)', 'rgba(133,103,152,0.6)', 'rgba(67,5,65,1)'], 
-              'f6_colors' : ['rgba(211,182,131,0.4)', 'rgba(127,104,78,0.6)', 'rgba(65,2,0,1)']}
+rgb_colors = {'f1_colors' : ['rgba(130,202,252,0.4)', 'rgba(06,130,219,0.6)', 'rgba(03,71,119,1)'], 
+              'f2_colors' : ['rgba(255,223,34,0.4)', 'rgba(224,191,0,0.6)', 'rgba(143,121,0,1)'], 
+              'f3_colors' : ['rgba(99,171,21,0.4)', 'rgba(73,127,16,0.6)', 'rgba(42,73,9,1)'],
+              'f4_colors' : ['rgba(207,98,117,0.4)', 'rgba(172,53,73,0.6)', 'rgba(109,34,46,1)'], 
+              'f5_colors' : ['rgba(196,142,253,0.4)', 'rgba(171,94,253,0.6)', 'rgba(49,1,101,1)'], 
+              'f6_colors' : ['rgba(211,182,131,0.4)', 'rgba(135,105,49,0.6)', 'rgba(217,114,255,1)']}
+            #   'f7_colors' : [],
+            #   'f8_colors' : [],
+            #   'f9_colors' : [],
+            #   'f10_colors' : [],
+            #   'f11_colors' : []
+            #   }
+hex_colors = {'f1_colors' : ['#89CBFB', '#098DEC', '#05528A'], 
+              'f2_colors' : ['#F5D000', '#CCAD00', '#8F7900'], 
+              'f3_colors' : ['#73C819', '#497F10', '#2A4909'],
+              'f4_colors' : ['#C4455A', '#9B3143', '#6D222E'], 
+              'f5_colors' : ['#CA9AFE', '#5902B6', '#310165'], 
+              'f6_colors' : ['#D4B987', '#BE964B', '#876931'],
+              'f7_colors' : ['#A88AA6', '#815F7F', '#463445'],
+              'f8_colors' : ['#D33665', '#A7254C', '#64162E'],
+              'f9_colors' : ['#12BA85', '#0D825D', '#074A35'],
+              'f10_colors' : ['#FAB79E', '#F67D51', '#AE3509'],
+              'f11_colors' : ['#9ECAD1', '#59A5B1', '#34676F'],
+              'f12_colors' : ['#C1AF85', '#806D40', '#5F5130']}
 
 xkcd_colors = {'f1_colors' : ['xkcd:sky', 'xkcd:lightish blue', 'xkcd:cobalt'],
                'f2_colors' : ['xkcd:sun yellow', 'xkcd:squash', 'xkcd:milk chocolate'],

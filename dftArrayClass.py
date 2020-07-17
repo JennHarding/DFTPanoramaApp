@@ -18,16 +18,14 @@ class dft_array(object):
             return np.fft.fft(self.original_array)
     
     def mag_dict(self):
-        return {f'f{i}' : np.abs(self.do_dft())[i] for i in range(1, 7)}
+        return {f'f{i}' : np.abs(self.do_dft())[i] for i in range(1, self.edo//2 + 1)}
     
     def phase_dict(self):
-        return {f'f{i}' : np.around(np.angle(self.do_dft(), deg=True)[i]) for i in range(1, 7)}
+        return {f'f{i}' : np.around(np.angle(self.do_dft(), deg=True)[i]) for i in range(1, self.edo//2 + 1)}
     
     def rounded_weighted_array(self):
         return np.around(np.log2(self.original_array + 1), decimals=2)
     
     def rounded_original_array(self):
         return np.around(self.original_array, decimals=2)
-    
-
     
