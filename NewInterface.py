@@ -22,17 +22,7 @@ SMALL_FONT = ("Verdana", 8)
 style.use("ggplot")
 score_data = "none"
 master_df = "none"
-
-def popupmsg(msg):
-    popup = tk.Tk()
-    popup.wm_title("!")
-    label = ttk.Label(popup, text=msg)
-    label.pack(side="top", fill="x", pady=10)
-    B1 = ttk.Button(popup, text="Okay", command=popup.destroy)
-    B1.pack()
-    popup.mainloop()
-    
-    
+EDO = 12
 
 
 
@@ -139,26 +129,31 @@ class StartPage(tk.Frame):
         log_select = tk.Checkbutton(self, text="Use Log Weighting \n (Recommended)", variable=log)
         log_select.grid(row=6, column=1, pady=20)
         
-        edo_label = tk.Label(self, text="EDO (max 24)")
+        
+        edo_label = tk.Label(self, text="EDO")
         edo_label.grid(row=7, column=0)
         edo = tk.IntVar()
         edo.set(12)
-        edo_select = tk.Entry(self, textvariable=edo)
+        edo_select = tk.OptionMenu(self, edo, 12, 24)
         edo_select.grid(row=7, column=1)
 
         
         def calculate_dft():
             global master_df
+            global EDO
+            
             config = {
                 "Repertoire": rep.get(),
                 "Excerpt": exc.get(),
                 "Excerpt Measures": (beg.get(), end.get()),
                 "Window Size": win_size.get(),
                 "Strategy": strat.get(),
-                "Log Weighting": log.get()
+                "Log Weighting": log.get(),
+                "EDO" : edo.get()
             }
             score_data = score_to_data(config.values())
             master_df = vis.make_dataframes(score_data=score_data)
+            EDO = edo.get()
 
             
         
@@ -173,10 +168,21 @@ class DataPage(tk.Frame):
         tk.Frame.__init__(self, parent)
         self.make_empty_graph()
         self.make_empty_dataframe()
-        
         self.var = tk.IntVar()
-               
-        for i in range(1, 7):
+        
+        global EDO
+    
+        
+        graph_options = ["Magnitudes"]
+        for i in range(1, EDO//2 + 1):
+            graph_options.append(f'f{i}')
+        graph = tk.StringVar()
+        graph.set(graph_options[0])
+        graph_menu = tk.OptionMenu(self, graph, *graph_options)
+        graph_menu.grid(row=1, column=4)
+        
+        
+        for i in range(1, EDO//2 + 1):
             comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
             comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
         mag_button = ttk.Radiobutton(self, text='Magnitudes', variable=self.var, value=7)
@@ -204,13 +210,14 @@ class DataPage(tk.Frame):
         
     def make_graph(self, canvas, sub, left, right):
         global master_df
+        global EDO
         sub.clear()
         left.clear()
         right.clear()
         i = self.var.get()
         
-        if i == 7:
-            for i in range(1, 7):
+        if i == EDO//2 + 1:
+            for i in range(1, EDO//2 +1):
                 left.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                         master_df[f'f{i} Magnitude'], 
                         # color=vis.xkcd_colors[f'f{i}_colors'][0],
@@ -276,6 +283,7 @@ class DataPage(tk.Frame):
         
     def make_data(self, table):
         global master_df
+        global EDO
         i = self.var.get()
         table.clearTable()
         
@@ -283,8 +291,8 @@ class DataPage(tk.Frame):
         df['Window'] = master_df['Window Number']
         df['Measures'] = master_df['Measure Range']
         df['Array'] = master_df['Original Array']
-        if i == 7:
-            for i in range(1, 7):
+        if i == EDO//2 + 1:
+            for i in range(1, EDO//2 + 1):
                 df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             pd.set_option('display.max_colwidth', 40)
             

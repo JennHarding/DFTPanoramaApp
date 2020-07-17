@@ -73,15 +73,43 @@ def get_beat_offsets_from_score(score):
     
     return offset_list
 
+def micro_pcs(note_):
+    if 'half' not in note_.pitch.fullName:
+        return note_.pitch.pitchClass
+    elif 'half-sharp' in note_.pitch.fullName:
+        return note_.pitch.pitchClass + 0.5
+    elif 'half-flat' in note_.pitch.fullName:
+        return note_.pitch.pitchClass - 0.5
 
-def update_array(array, note_, strategy):
-    if strategy == 'Onset':
-        array[note_.pitch.pitchClass] += 1
-    elif strategy == 'Duration':
-        array[note_.pitch.pitchClass] += note_.quarterLength
-    elif strategy == 'Flat':
-        array[note_.pitch.pitchClass] = 1
-    return array
+
+def update_array(array, note_, strategy, edo):
+    if edo == 12:
+        if strategy == 'Onset':
+            array[note_.pitch.pitchClass] += 1
+        elif strategy == 'Duration':
+            array[note_.pitch.pitchClass] += note_.quarterLength
+        elif strategy == 'Flat':
+            array[note_.pitch.pitchClass] = 1
+        return array 
+    elif edo == 24:
+        if strategy == 'Onset':
+            array[micro_pcs(note_) * 2] += 1
+        elif strategy == 'Duration':
+            array[micro_pcs(note_) * 2] += note_.quarterLength
+        elif strategy == 'Flat':
+            array[micro_pcs(note_) * 2] = 1
+        return array 
+        
+    
+        
+# def update_array(array, note_, strategy):
+#     if strategy == 'Onset':
+#         array[note_.pitch.pitchClass] += 1
+#     elif strategy == 'Duration':
+#         array[note_.pitch.pitchClass] += note_.quarterLength
+#     elif strategy == 'Flat':
+#         array[note_.pitch.pitchClass] = 1
+#     return array
 
 
 def get_measure_number(score, offset):
@@ -112,12 +140,14 @@ def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo
                     current_array = update_array(
                         array=current_array, 
                         note_=a, 
-                        strategy=strategy)
+                        strategy=strategy,
+                        edo=edo)
             elif isinstance(elem, note.Note):
                 current_array = update_array(
                     array=current_array, 
                     note_=elem, 
-                    strategy=strategy)
+                    strategy=strategy,
+                    edo=edo)
 
         all_arrays.append(dft_array(
             array=current_array, 
@@ -129,7 +159,7 @@ def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo
 
 def score_to_data(config):  
      
-    repertoire, excerpt, measures, window, strat, log = config
+    repertoire, excerpt, measures, window, strat, log, edo = config
     parsed_score = parse_score(score_string=repertoire, measure_nums=measures)
     beat_offset_list = get_beat_offsets_from_score(score=parsed_score.parts[0])
 
@@ -143,6 +173,7 @@ def score_to_data(config):
         beat_offset_list=beat_offset_list, 
         window_size=window, 
         strategy=strat, 
-        log=log)
+        log=log,
+        edo=edo)
 
     return multisets
