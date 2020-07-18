@@ -26,6 +26,7 @@ EDO = 12
 
 
 
+
 class PanoramaGenerator(tk.Tk):
     
     def __init__(self, *args, **kwargs):
@@ -129,15 +130,20 @@ class StartPage(tk.Frame):
         log_select = tk.Checkbutton(self, text="Use Log Weighting \n (Recommended)", variable=log)
         log_select.grid(row=6, column=1, pady=20)
         
+        def edo_callback(var, indx, mode):
+            global EDO
+            print("EDO changed to {}".format(edo.get()))
+            EDO = edo.get()
         
         edo_label = tk.Label(self, text="EDO")
         edo_label.grid(row=7, column=0)
         edo = tk.IntVar()
         edo.set(12)
+        edo.trace_add(mode='write', callback=edo_callback)
         edo_select = tk.OptionMenu(self, edo, 12, 24)
         edo_select.grid(row=7, column=1)
+ 
 
-        
         def calculate_dft():
             global master_df
             global EDO
@@ -149,45 +155,55 @@ class StartPage(tk.Frame):
                 "Window Size": win_size.get(),
                 "Strategy": strat.get(),
                 "Log Weighting": log.get(),
-                "EDO" : edo.get()
+                "EDO" : EDO
             }
             score_data = score_to_data(config.values())
             master_df = vis.make_dataframes(score_data=score_data)
-            EDO = edo.get()
+            print(f'The EDO in use is {EDO}')
 
             
-        
         calculate = ttk.Button(self, text="Calculate", command=calculate_dft)
         calculate.grid(row=8, column=0, columnspan=4, sticky="we")
               
         
 
 class DataPage(tk.Frame):
-    
+
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.make_empty_graph()
         self.make_empty_dataframe()
         self.var = tk.IntVar()
+        self.graph_options = []
         
-        global EDO
-    
         
-        graph_options = ["Magnitudes"]
-        for i in range(1, EDO//2 + 1):
-            graph_options.append(f'f{i}')
+        def graph_callback(var, indx, mode):
+            print("Graph changed to {}".format(graph.get()))
+            self.var = self.graph_options.index(graph.get())
+            print("New variable is {}".format(self.var))
+            
+            
+        message = ["Update EDO First"]
         graph = tk.StringVar()
-        graph.set(graph_options[0])
-        graph_menu = tk.OptionMenu(self, graph, *graph_options)
-        graph_menu.grid(row=1, column=4)
+        graph.set(message[0])
+        graph_menu = tk.OptionMenu(self, graph, *message)
+        graph_menu.grid(row=0, column=1, sticky='w')
+        graph.trace_add(mode='write', callback=graph_callback)
         
         
-        for i in range(1, EDO//2 + 1):
-            comp_button = ttk.Radiobutton(self, text=f'f{i}', variable=self.var, value=i)
-            comp_button.grid(row=(i-1)%2, column=(i-1)//2 + 1)
-        mag_button = ttk.Radiobutton(self, text='Magnitudes', variable=self.var, value=7)
-        mag_button.grid(row=0, column=4)
+        def update_options():
+            global EDO
+            graph_menu['menu'].delete(0, 'end')
+            self.graph_options = ["Magnitudes"]
+            for i in range(1, EDO//2 + 1):
+                self.graph_options.append(f'f{i}')
+            graph.set(self.graph_options[0])
+            for g in self.graph_options:
+                graph_menu['menu'].add_command(label=g, command=tk._setit(var=graph, value=g))
         
+        update_button = ttk.Button(self, text="Update EDO", command=lambda: update_options())
+        update_button.grid(row=0, column=0, sticky='w')
+      
         
     def make_empty_graph(self):
         fig = Figure(figsize=(10,2.5))
@@ -206,7 +222,8 @@ class DataPage(tk.Frame):
         toolbar.pack()
         
         graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_graph(canvas=canvas, sub=sub, left=sub_left, right=sub_right))
-        graph_button.grid(row=0, column=0, sticky="w")
+        graph_button.grid(row=1, column=0, sticky="w")
+        
         
     def make_graph(self, canvas, sub, left, right):
         global master_df
@@ -214,9 +231,8 @@ class DataPage(tk.Frame):
         sub.clear()
         left.clear()
         right.clear()
-        i = self.var.get()
         
-        if i == EDO//2 + 1:
+        if self.var == 0:
             for i in range(1, EDO//2 +1):
                 left.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                         master_df[f'f{i} Magnitude'], 
@@ -226,22 +242,28 @@ class DataPage(tk.Frame):
                         labels=[f'f{i} Magnitude'])
                 left.margins(x=0) 
 
-            left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=6)
+            left.legend(loc="lower center", 
+                        bbox_to_anchor=(0.5, 1.02), 
+                        borderaxespad=0, 
+                        fancybox=True, 
+                        shadow=True, 
+                        prop={'size': 7}, 
+                        ncol=6
+                        )
             left.set_ylabel("Magnitude")
             right.grid(b=False)
             right.margins(x=0)
             right.tick_params(axis='y', length=0)
             right.set_yticklabels([])
             
-            
-        
         else:
             right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                     master_df[f'f{i} Magnitude'], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
                     color=vis.hex_colors[f'f{i}_colors'][0],
                     alpha=0.3,
-                    labels=[f'f{i} Magnitude'])
+                    labels=[f'f{i} Magnitude']
+                    )
             right.grid(b=False)
             right.margins(x=0) 
             right.set_ylabel("Magnitude")
@@ -264,12 +286,17 @@ class DataPage(tk.Frame):
             left.set_ylabel("Phase")
             left.set_xlabel("Window")
 
-            left.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), borderaxespad=0, fancybox=True, shadow=True, prop={'size': 7}, ncol=2)
+            left.legend(loc="lower center", 
+                        bbox_to_anchor=(0.5, 1.02), 
+                        borderaxespad=0, 
+                        fancybox=True, 
+                        shadow=True, 
+                        prop={'size': 7}, 
+                        ncol=2
+                        )
         canvas.draw()
             
         
-        
-
     def make_empty_dataframe(self):
         empty_df = pd.DataFrame({})
         frame = tk.Frame(self)
@@ -278,20 +305,19 @@ class DataPage(tk.Frame):
         pt.show()
         
         df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_data(table=pt))
-        df_button.grid(row=1, column=0, sticky="w")       
+        df_button.grid(row=1, column=1, sticky="w")       
         
         
     def make_data(self, table):
         global master_df
         global EDO
-        i = self.var.get()
         table.clearTable()
         
         df = table.model.df
         df['Window'] = master_df['Window Number']
         df['Measures'] = master_df['Measure Range']
         df['Array'] = master_df['Original Array']
-        if i == EDO//2 + 1:
+        if self.var == 0:
             for i in range(1, EDO//2 + 1):
                 df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             pd.set_option('display.max_colwidth', 40)

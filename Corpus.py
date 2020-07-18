@@ -23,6 +23,7 @@ harb = 'Harbison\\'
 mei = 'MEI\\'
 elvis = 'ELVIS\\'
 test = 'TestScores\\'
+micro = 'Microtonal\\'
 
 mozSQs = [x for x in os.listdir(corpus+moz)]
 mess_misc = [x for x in os.listdir(corpus+mess)]
@@ -31,6 +32,7 @@ mess_misc = [x for x in os.listdir(corpus+mess)]
 # tests = [x for x in os.listdir(corpus+test)]
 # elvis_corpus = [x for x in os.listdir(corpus+elvis)]
 CRIM = [x for x in os.listdir(CRIM_corpus)]
+micros = [x for x in os.listdir(corpus+micro)]
 
 # full_corpus = mozSQs + music21_corpus + mess_misc + harbs + meis + tests
 
@@ -38,4 +40,4 @@ CRIM = [x for x in os.listdir(CRIM_corpus)]
 
 # full_corpus = CRIM 
 
-full_corpus = mozSQs + mess_misc
+full_corpus = mozSQs + mess_misc + micros

@@ -21,6 +21,8 @@ def parse_score(score_string, measure_nums=None):
     #     working_score = converter.parse(Corpus.corpus+Corpus.test+score_string)
     # elif score_string in Corpus.elvis_corpus:
     #     working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
+    elif score_string in Corpus.micros:
+        working_score = converter.parse(Corpus.corpus+Corpus.micro+score_string)
     if score_string in Corpus.CRIM:
         working_score = converter.parse(Corpus.CRIM_corpus + score_string)
     
