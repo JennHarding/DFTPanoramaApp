@@ -46,6 +46,7 @@ class PanoramaGenerator(tk.Tk):
         goto_menu = tk.Menu(menubar, tearoff=1)
         goto_menu.add_command(label="Home", command=lambda: self.show_frame(StartPage))
         goto_menu.add_command(label="Data", command=lambda: self.show_frame(DataPage))
+        goto_menu.add_command(label="Phase Comparison", command=lambda: self.show_frame(PhaseComparisonPage))
         menubar.add_cascade(label="Go To", menu=goto_menu)
         
         tk.Tk.config(self, menu=menubar)
@@ -53,7 +54,7 @@ class PanoramaGenerator(tk.Tk):
         
         self.frames = {}
         
-        for F in (StartPage, DataPage):
+        for F in (StartPage, DataPage, PhaseComparisonPage):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -158,7 +159,7 @@ class StartPage(tk.Frame):
                 "EDO" : EDO
             }
             score_data = score_to_data(config.values())
-            master_df = vis.make_dataframes(score_data=score_data)
+            master_df = vis.make_dataframes(score_data=score_data, edo=EDO)
             print(f'The EDO in use is {EDO}')
 
             
@@ -257,6 +258,7 @@ class DataPage(tk.Frame):
             right.set_yticklabels([])
             
         else:
+            i = self.var
             right.stackplot(range(len(master_df[f'f{i} Magnitude'])), 
                     master_df[f'f{i} Magnitude'], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
@@ -323,12 +325,83 @@ class DataPage(tk.Frame):
             pd.set_option('display.max_colwidth', 40)
             
         else:
+            i = self.var
             df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             df['Phase'] = master_df[f'f{i} Phase']
             df['Quantized Phase'] = master_df[f'f{i} Quantized Phase']
         table.redraw()
 
 
+
+class PhaseComparisonPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.make_empty_graph()
+        self.make_empty_dataframe()
+        self.varX = tk.IntVar()
+        self.varY = tk.Intvar()
+        self.varZ = tk.IntVar()
+        self.graph_options = []
+        
+        
+        def update_options():
+            global EDO
+            graph_menu['menu'].delete(0, 'end')
+            for i in range(1, EDO//2 + 1):
+                self.graph_options.append(f'f{i} Phase')
+            graph.set(self.graph_options[0])
+            for g in self.graph_options:
+                graph_menu['menu'].add_command(label=g, command=tk._setit(var=graph, value=g))
+        
+        update_button = ttk.Button(self, text="Update EDO", command=lambda: update_options())
+        update_button.grid(row=0, column=0, sticky='w')
+        
+        message = ["Update EDO First"]
+        graph = tk.StringVar()
+        graph.set(message[0])
+        variable_names = ["X + ", "Y - ", "Z"]
+        for idx, v in enumerate(variable_names, start=2):
+            variable_label = ttk.Label(self, text=v)
+            variable_label.grid(row=1, column=idx)
+            variable_menu = tk.OptionMenu(self, graph, *message)
+            variable_menu.grid(row=2, column=idx)
+            
+            
+        graph = tk.StringVar()
+        graph.set(message[0])
+        graph_menu = tk.OptionMenu(self, graph, *message)
+        graph_menu.grid(row=0, column=1, sticky='w')
+        graph.trace_add(mode='write', callback=graph_callback)
+
+    def make_empty_graph(self):
+        fig = Figure(figsize=(10,2.5))
+        sub = fig.add_subplot(111)
+        sub_left = fig.add_subplot(111)
+        sub_right = sub_left.twinx()
+        
+        canvas = FigureCanvasTkAgg(fig, self)
+        canvas.draw()
+        canvas.get_tk_widget()
+        canvas.get_tk_widget().grid(row=4, column=0, sticky="we", columnspan=7)
+        
+        toolbar_frame = tk.Frame(self)
+        toolbar_frame.grid(row=3, column=0, sticky="w", columnspan=7)
+        toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
+        toolbar.pack()
+        
+        graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_graph(canvas=canvas, sub=sub, left=sub_left, right=sub_right))
+        graph_button.grid(row=1, column=0, sticky="w")
+        
+        
+    def make_empty_dataframe(self):
+        empty_df = pd.DataFrame({})
+        frame = tk.Frame(self)
+        frame.grid(row=5, column=0, sticky="we", columnspan=7)
+        pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
+        pt.show()
+        
+        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_data(table=pt))
+        df_button.grid(row=1, column=1, sticky="w")      
 
 app = PanoramaGenerator()
 # app.geometry("1280x720")

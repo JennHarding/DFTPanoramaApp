@@ -17,12 +17,7 @@ rgb_colors = {'f1_colors' : ['rgba(130,202,252,0.4)', 'rgba(06,130,219,0.6)', 'r
               'f4_colors' : ['rgba(207,98,117,0.4)', 'rgba(172,53,73,0.6)', 'rgba(109,34,46,1)'], 
               'f5_colors' : ['rgba(196,142,253,0.4)', 'rgba(171,94,253,0.6)', 'rgba(49,1,101,1)'], 
               'f6_colors' : ['rgba(211,182,131,0.4)', 'rgba(135,105,49,0.6)', 'rgba(217,114,255,1)']}
-            #   'f7_colors' : [],
-            #   'f8_colors' : [],
-            #   'f9_colors' : [],
-            #   'f10_colors' : [],
-            #   'f11_colors' : []
-            #   }
+
 hex_colors = {'f1_colors' : ['#89CBFB', '#098DEC', '#05528A'], 
               'f2_colors' : ['#F5D000', '#CCAD00', '#8F7900'], 
               'f3_colors' : ['#73C819', '#497F10', '#2A4909'],
@@ -50,15 +45,15 @@ def quantize_array(array, quant=12):
     return q * spacing
 
 
-def magnitudes_panorama(df, color_dict, title=None, edo=12):
-    f = Figure()
-    a = f.add_subplot(111)
-    for i in range(1, edo//2 + 1):
-        a.fill_between(
-            x=len(df[f'f{i} Magnitude']),
-            y1=df[f'f{i} Magnitude'],
-            color=color_dict[f'f{i}_colors'][0],
-        )
+# def magnitudes_panorama(df, color_dict, title=None, edo=12):
+#     f = Figure()
+#     a = f.add_subplot(111)
+#     for i in range(1, edo//2 + 1):
+#         a.fill_between(
+#             x=len(df[f'f{i} Magnitude']),
+#             y1=df[f'f{i} Magnitude'],
+#             color=color_dict[f'f{i}_colors'][0],
+#         )
 
 
 def make_dataframes(score_data, edo=12):
@@ -70,7 +65,7 @@ def make_dataframes(score_data, edo=12):
 
     phases = {f'f{i} Phase' : [a.phase_dict()[f'f{i}'] for a in score_data] for i in range(1, edo//2 +1)}
     phases['f6 Phase'] = [180 if x < -179 else x for x in phases['f6 Phase']]
-    quantized_phases = {f'f{i} Quantized Phase' : [quantize_array(a.phase_dict()[f'f{i}']) for a in score_data] for i in range(1, edo//2 +1)}
+    quantized_phases = {f'f{i} Quantized Phase' : [quantize_array(a.phase_dict()[f'f{i}'], quant=edo) for a in score_data] for i in range(1, edo//2 +1)}
     quantized_phases['f6 Quantized Phase'] = [180 if x < -179 else x for x in quantized_phases['f6 Quantized Phase']]
     magnitudes = {f'f{i} Magnitude' : [np.around(a.mag_dict()[f'f{i}'], decimals=2) for a in score_data] for i in range(1, edo//2 + 1)}
 

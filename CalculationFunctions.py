@@ -95,11 +95,11 @@ def update_array(array, note_, strategy, edo):
         return array 
     elif edo == 24:
         if strategy == 'Onset':
-            array[micro_pcs(note_) * 2] += 1
+            array[int(micro_pcs(note_) * 2)] += 1
         elif strategy == 'Duration':
-            array[micro_pcs(note_) * 2] += note_.quarterLength
+            array[int(micro_pcs(note_) * 2)] += note_.quarterLength
         elif strategy == 'Flat':
-            array[micro_pcs(note_) * 2] = 1
+            array[int(micro_pcs(note_) * 2)] = 1
         return array 
         
     
