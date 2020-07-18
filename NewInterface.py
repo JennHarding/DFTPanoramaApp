@@ -339,43 +339,63 @@ class PhaseComparisonPage(tk.Frame):
         self.make_empty_graph()
         self.make_empty_dataframe()
         self.varX = tk.IntVar()
-        self.varY = tk.Intvar()
+        self.varY = tk.IntVar()
         self.varZ = tk.IntVar()
+        self.X = tk.StringVar()
+        self.Y = tk.StringVar()
+        self.Z = tk.StringVar()
         self.graph_options = []
+        self.menus = []
+        
+        var_list = [self.X, self.Y, self.Z]
+        self.variables = {"X" : self.varX,
+                          "Y" : self.varY,
+                          "Z" : self.varZ}
         
         
         def update_options():
             global EDO
-            graph_menu['menu'].delete(0, 'end')
             for i in range(1, EDO//2 + 1):
                 self.graph_options.append(f'f{i} Phase')
-            graph.set(self.graph_options[0])
-            for g in self.graph_options:
-                graph_menu['menu'].add_command(label=g, command=tk._setit(var=graph, value=g))
+            for v in var_list:
+                v.set(self.graph_options[0])
+            for idx, m in enumerate(self.menus):
+                m['menu'].delete(0, 'end')
+                for g in self.graph_options:
+                    m['menu'].add_command(label=g, command=tk._setit(var=var_list[idx], value=g))
+                    
+        
+        def graph_callback(var, indx, mode):
+            for idx, (k, v) in enumerate(self.variables.items()):
+                print("Graph changed to {}".format(var_list[idx].get()))
+                v = self.graph_options.index(var_list[idx].get()) + 1
+                self.variables[k] = v
+                print(f'The variable for {k} is now {v}')
+                
+                
+        message = ["Update EDO First"]
+        
+        for idx, k in enumerate(self.variables.keys()):
+            variable_label = ttk.Label(self, text=k)
+            variable_label.grid(row=1, column=idx*2 +2, sticky='w')
+            variable_menu = tk.OptionMenu(self, var_list[idx], *message)
+            variable_menu.grid(row=2, column=idx*2 +2, sticky='w')
+            self.menus.append(variable_menu)
+            var_list[idx].trace_add(mode='write', callback=graph_callback)
         
         update_button = ttk.Button(self, text="Update EDO", command=lambda: update_options())
         update_button.grid(row=0, column=0, sticky='w')
         
-        message = ["Update EDO First"]
-        graph = tk.StringVar()
-        graph.set(message[0])
-        variable_names = ["X + ", "Y - ", "Z"]
-        for idx, v in enumerate(variable_names, start=2):
-            variable_label = ttk.Label(self, text=v)
-            variable_label.grid(row=1, column=idx)
-            variable_menu = tk.OptionMenu(self, graph, *message)
-            variable_menu.grid(row=2, column=idx)
-            
-            
-        graph = tk.StringVar()
-        graph.set(message[0])
-        graph_menu = tk.OptionMenu(self, graph, *message)
-        graph_menu.grid(row=0, column=1, sticky='w')
-        graph.trace_add(mode='write', callback=graph_callback)
+        plus = ttk.Label(self, text="+")
+        plus.grid(row=1, column=3, sticky='we')
+        plus.config(font=LARGE_FONT)
+        minus = ttk.Label(self, text="-")
+        minus.grid(row=1, column=5, sticky='we')
+        minus.config(font=LARGE_FONT)
+         
 
     def make_empty_graph(self):
         fig = Figure(figsize=(10,2.5))
-        sub = fig.add_subplot(111)
         sub_left = fig.add_subplot(111)
         sub_right = sub_left.twinx()
         
@@ -389,19 +409,102 @@ class PhaseComparisonPage(tk.Frame):
         toolbar = NavigationToolbar2Tk(canvas, toolbar_frame)
         toolbar.pack()
         
-        graph_button = ttk.Button(self, text="Update Graph", command=lambda: self.make_graph(canvas=canvas, sub=sub, left=sub_left, right=sub_right))
+        graph_button = ttk.Button(self, 
+                                  text="Update Graph", 
+                                  command=lambda: self.make_graph(canvas=canvas, 
+                                                                  left=sub_left, 
+                                                                  right=sub_right, 
+                                                                  x=self.variables["X"], 
+                                                                  y=self.variables["Y"], 
+                                                                  z=self.variables["Z"]))
         graph_button.grid(row=1, column=0, sticky="w")
         
         
     def make_empty_dataframe(self):
+        
+        
         empty_df = pd.DataFrame({})
         frame = tk.Frame(self)
         frame.grid(row=5, column=0, sticky="we", columnspan=7)
         pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
         pt.show()
         
-        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_data(table=pt))
+        df_button = ttk.Button(self, 
+                               text="Update Table", 
+                               command=lambda: self.make_data(table=pt, 
+                                                              x=self.variables["X"], 
+                                                              y=self.variables["Y"], 
+                                                              z=self.variables["Z"]))
         df_button.grid(row=1, column=1, sticky="w")      
+        
+        
+    def make_graph(self, canvas, left, right, x, y, z):
+        global master_df
+        left.clear()
+        right.clear()
+        
+        for i in [x, y, z]:
+            print(f'X is {x} // Y is {y} // Z is {z}')
+            left.plot(range(len(master_df[f'f{i} Phase'])),
+                        master_df[f'f{i} Phase'],
+                        # color=vis.xkcd_colors[f'f{i}_colors'][1],
+                        color=vis.hex_colors[f'f{i}_colors'][1],
+                        label=f'f{i} Phase',
+                        )
+        
+        left.set_yticks(ticks=range(-180,210,30))
+        left.grid(axis='x')
+        left.margins(x=0)
+        left.set_ylabel("Phase")
+        left.set_xlabel("Window")
+        
+        left.legend(loc="upper right", 
+            bbox_to_anchor=(-0.06, 1), 
+            borderaxespad=0, 
+            fancybox=True, 
+            shadow=True, 
+            prop={'size': 7}, 
+            ncol=1
+            )
+
+
+        right.plot(range(len(master_df[f'f{x} Phase'])), 
+                    master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase'], 
+                    # color=vis.xkcd_colors[f'f{i}_colors'][0],
+                    color='black',
+                    label='X+Y-Z'
+                    )
+        right.grid(b=False)
+        right.margins(x=0) 
+        right.set_ylabel("Phase Index")        
+        
+        right.legend(loc="upper left", 
+                     bbox_to_anchor=(1.04, 1),  
+                     borderaxespad=0,  
+                     fancybox=True, 
+                     shadow=True, 
+                     prop={'size': 7}, 
+                     ncol=1
+            )
+        
+
+        
+        canvas.draw()
+        
+    def make_data(self, table, x, y, z):
+        global master_df
+        table.clearTable()
+        
+        df = table.model.df
+        df['Window'] = master_df['Window Number']
+        df['Measures'] = master_df['Measure Range']
+        df['Array'] = master_df['Original Array']
+        df[f'f{x} Phase'] = master_df[f'f{x} Phase']
+        df[f'f{y} Phase'] = master_df[f'f{y} Phase']
+        df[f'f{z} Phase'] = master_df[f'f{z} Phase']
+        df['Phase Index'] = master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']
+        table.redraw()        
+    
 
 app = PanoramaGenerator()
 # app.geometry("1280x720")
