@@ -355,6 +355,7 @@ class PhaseComparisonPage(tk.Frame):
         
         def update_options():
             global EDO
+            self.graph_options.clear()
             for i in range(1, EDO//2 + 1):
                 self.graph_options.append(f'f{i} Phase')
             for v in var_list:
@@ -466,10 +467,21 @@ class PhaseComparisonPage(tk.Frame):
             prop={'size': 7}, 
             ncol=1
             )
-
+        
+    
+        def fix_index(phaseIndex):
+            print(phaseIndex)
+            if abs(phaseIndex) <= 180:
+                return phaseIndex
+            elif phaseIndex > 180:
+                return phaseIndex - 360
+            elif phaseIndex < -180:
+                return 360 - abs(phaseIndex)
+        
+        find_index = (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()
 
         right.plot(range(len(master_df[f'f{x} Phase'])), 
-                    master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase'], 
+                    [fix_index(phaseIndex=p_idx) for p_idx in find_index], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
                     color='black',
                     label='X+Y-Z'
