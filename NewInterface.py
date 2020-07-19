@@ -47,6 +47,7 @@ class PanoramaGenerator(tk.Tk):
         goto_menu.add_command(label="Home", command=lambda: self.show_frame(StartPage))
         goto_menu.add_command(label="Data", command=lambda: self.show_frame(DataPage))
         goto_menu.add_command(label="Phase Comparison", command=lambda: self.show_frame(PhaseComparisonPage))
+        goto_menu.add_command(label="Master Data Frame", command=lambda: self.show_frame(MasterDataFrame))
         menubar.add_cascade(label="Go To", menu=goto_menu)
         
         tk.Tk.config(self, menu=menubar)
@@ -54,7 +55,7 @@ class PanoramaGenerator(tk.Tk):
         
         self.frames = {}
         
-        for F in (StartPage, DataPage, PhaseComparisonPage):
+        for F in (StartPage, DataPage, PhaseComparisonPage, MasterDataFrame):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -422,8 +423,6 @@ class PhaseComparisonPage(tk.Frame):
         
         
     def make_empty_dataframe(self):
-        
-        
         empty_df = pd.DataFrame({})
         frame = tk.Frame(self)
         frame.grid(row=5, column=0, sticky="we", columnspan=7)
@@ -518,6 +517,32 @@ class PhaseComparisonPage(tk.Frame):
         df['Phase Index'] = master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']
         df['Normalized Index'] = [self.fix_index(phaseIndex=p_idx) for p_idx in (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()]
         table.redraw()        
+        
+class MasterDataFrame(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        self.make_empty_dataframe()
+        
+    def make_empty_dataframe(self):
+        empty_df = pd.DataFrame({})
+        frame = tk.Frame(self)
+        frame.grid(row=5, column=0, sticky="nswe", columnspan=7)
+        pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
+        pt.show()
+        
+        df_button = ttk.Button(self, 
+                            text="Update Table", 
+                            command=lambda: self.make_data(table=pt))
+        df_button.grid(row=1, column=1, sticky="w")   
+    
+    
+    def make_data(self, table):
+        global master_df
+        table.clearTable()
+        
+        df = table.model.df = master_df
+        
+        table.redraw()
     
 
 app = PanoramaGenerator()
@@ -527,3 +552,6 @@ app.geometry("1024x768")
 
 # makeGraph()
 app.mainloop()
+
+
+
