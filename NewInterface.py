@@ -439,6 +439,14 @@ class PhaseComparisonPage(tk.Frame):
         df_button.grid(row=1, column=1, sticky="w")      
         
         
+    def fix_index(self, phaseIndex):
+            print(phaseIndex)
+            if abs(phaseIndex) <= 180:
+                return abs(phaseIndex)
+            else:
+                return abs(360 - abs(phaseIndex))
+            
+        
     def make_graph(self, canvas, left, right, x, y, z):
         global master_df
         left.clear()
@@ -469,19 +477,12 @@ class PhaseComparisonPage(tk.Frame):
             )
         
     
-        def fix_index(phaseIndex):
-            print(phaseIndex)
-            if abs(phaseIndex) <= 180:
-                return phaseIndex
-            elif phaseIndex > 180:
-                return phaseIndex - 360
-            elif phaseIndex < -180:
-                return 360 - abs(phaseIndex)
+        
         
         find_index = (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()
 
         right.plot(range(len(master_df[f'f{x} Phase'])), 
-                    [fix_index(phaseIndex=p_idx) for p_idx in find_index], 
+                    [self.fix_index(phaseIndex=p_idx) for p_idx in find_index], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
                     color='black',
                     label='X+Y-Z'
@@ -497,7 +498,7 @@ class PhaseComparisonPage(tk.Frame):
                      shadow=True, 
                      prop={'size': 7}, 
                      ncol=1
-            )
+                     )
         
 
         
@@ -515,6 +516,7 @@ class PhaseComparisonPage(tk.Frame):
         df[f'f{y} Phase'] = master_df[f'f{y} Phase']
         df[f'f{z} Phase'] = master_df[f'f{z} Phase']
         df['Phase Index'] = master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']
+        df['Normalized Index'] = [self.fix_index(phaseIndex=p_idx) for p_idx in (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()]
         table.redraw()        
     
 
