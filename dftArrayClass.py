@@ -18,7 +18,7 @@ class dft_array(object):
             return np.fft.fft(self.original_array)
     
     def mag_dict(self):
-        return {f'f{i}' : np.abs(self.do_dft())[i] for i in range(1, self.edo//2 + 1)}
+        return {f'f{i}' : np.abs(self.do_dft())[i] for i in range(0, self.edo//2 + 1)}
     
     def phase_dict(self):
         return {f'f{i}' : int(np.around(np.angle(self.do_dft(), deg=True)[i])) for i in range(1, self.edo//2 + 1)}

@@ -68,9 +68,7 @@ class PanoramaGenerator(tk.Tk):
         frame = self.frames[cont]
         frame.tkraise()
         
-    
-    
-        
+
 
 class StartPage(tk.Frame):
     
@@ -321,7 +319,7 @@ class DataPage(tk.Frame):
         df['Measures'] = master_df['Measure Range']
         df['Array'] = master_df['Original Array']
         if self.var == 0:
-            for i in range(1, EDO//2 + 1):
+            for i in range(0, EDO//2 + 1):
                 df[f'| f{i} |'] = master_df[f'f{i} Magnitude']
             pd.set_option('display.max_colwidth', 40)
             
@@ -439,11 +437,18 @@ class PhaseComparisonPage(tk.Frame):
         
         
     def fix_index(self, phaseIndex):
-            print(phaseIndex)
             if abs(phaseIndex) <= 180:
                 return abs(phaseIndex)
             else:
                 return abs(360 - abs(phaseIndex))
+            
+    
+    def make_phase_index_df(self, df, x, y, z):
+        phase_index_list = (df[f'f{x} Phase'] + df[f'f{y} Phase'] - df[f'f{z} Phase']).values.tolist()
+        normalized_phase_index_list = [self.fix_index(phaseIndex=p_idx) for p_idx in phase_index_list]
+        phase_index_df = pd.DataFrame({'Phase Index' : phase_index_list, 'Normalized Index' : normalized_phase_index_list})
+        return phase_index_df
+            
             
         
     def make_graph(self, canvas, left, right, x, y, z):
@@ -451,8 +456,10 @@ class PhaseComparisonPage(tk.Frame):
         left.clear()
         right.clear()
         
+        phase_index_df = self.make_phase_index_df(df=master_df, x=x, y=y, z=z)
+        
         for i in [x, y, z]:
-            print(f'X is {x} // Y is {y} // Z is {z}')
+            # print(f'X is {x} // Y is {y} // Z is {z}')
             left.plot(range(len(master_df[f'f{i} Phase'])),
                         master_df[f'f{i} Phase'],
                         # color=vis.xkcd_colors[f'f{i}_colors'][1],
@@ -475,13 +482,9 @@ class PhaseComparisonPage(tk.Frame):
             ncol=1
             )
         
-    
-        
-        
-        find_index = (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()
-
         right.plot(range(len(master_df[f'f{x} Phase'])), 
-                    [self.fix_index(phaseIndex=p_idx) for p_idx in find_index], 
+                   phase_index_df['Normalized Index'],
+                    # [self.fix_index(phaseIndex=p_idx) for p_idx in find_index], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
                     color='black',
                     label='X+Y-Z'
@@ -498,14 +501,15 @@ class PhaseComparisonPage(tk.Frame):
                      prop={'size': 7}, 
                      ncol=1
                      )
-        
 
-        
         canvas.draw()
+        
         
     def make_data(self, table, x, y, z):
         global master_df
         table.clearTable()
+        
+        phase_index_df = self.make_phase_index_df(df=master_df, x=x, y=y, z=z)
         
         df = table.model.df
         df['Window'] = master_df['Window Number']
@@ -514,9 +518,10 @@ class PhaseComparisonPage(tk.Frame):
         df[f'f{x} Phase'] = master_df[f'f{x} Phase']
         df[f'f{y} Phase'] = master_df[f'f{y} Phase']
         df[f'f{z} Phase'] = master_df[f'f{z} Phase']
-        df['Phase Index'] = master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']
-        df['Normalized Index'] = [self.fix_index(phaseIndex=p_idx) for p_idx in (master_df[f'f{x} Phase'] + master_df[f'f{y} Phase'] - master_df[f'f{z} Phase']).values.tolist()]
+        df['Phase Index'] = phase_index_df['Phase Index']
+        df['Normalized Index'] = phase_index_df['Normalized Index']
         table.redraw()        
+        
         
 class MasterDataFrame(tk.Frame):
     def __init__(self, parent, controller):
@@ -530,9 +535,7 @@ class MasterDataFrame(tk.Frame):
         pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
         pt.show()
         
-        df_button = ttk.Button(self, 
-                            text="Update Table", 
-                            command=lambda: self.make_data(table=pt))
+        df_button = ttk.Button(self, text="Update Table", command=lambda: self.make_data(table=pt))
         df_button.grid(row=1, column=1, sticky="w")   
     
     
@@ -546,11 +549,7 @@ class MasterDataFrame(tk.Frame):
     
 
 app = PanoramaGenerator()
-# app.geometry("1280x720")
 app.geometry("1024x768")
-# app['bg'] = '#DBE0DF'
-
-# makeGraph()
 app.mainloop()
 
 

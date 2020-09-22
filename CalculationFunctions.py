@@ -11,8 +11,8 @@ def parse_score(score_string, measure_nums=None):
     #     working_score = corpus.parse(score_string)
     if score_string in Corpus.mozSQs:
         working_score = converter.parse(Corpus.corpus+Corpus.moz+score_string)
-    # elif score_string in Corpus.harbs:
-    #     working_score = converter.parse(Corpus.corpus+Corpus.harb+score_string)
+    elif score_string in Corpus.harbs:
+        working_score = converter.parse(Corpus.corpus+Corpus.harb+score_string)
     elif score_string in Corpus.mess_misc:
         working_score = converter.parse(Corpus.corpus+Corpus.mess+score_string)
     # elif score_string in Corpus.meis:

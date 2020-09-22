@@ -27,7 +27,7 @@ micro = 'Microtonal\\'
 
 mozSQs = [x for x in os.listdir(corpus+moz)]
 mess_misc = [x for x in os.listdir(corpus+mess)]
-# harbs = [x for x in os.listdir(corpus+harb)]
+harbs = [x for x in os.listdir(corpus+harb)]
 # meis = [x for x in os.listdir(corpus+mei)]
 # tests = [x for x in os.listdir(corpus+test)]
 # elvis_corpus = [x for x in os.listdir(corpus+elvis)]
@@ -40,4 +40,4 @@ micros = [x for x in os.listdir(corpus+micro)]
 
 # full_corpus = CRIM 
 
-full_corpus = mozSQs + mess_misc + micros
+full_corpus = mozSQs + mess_misc + micros + harbs

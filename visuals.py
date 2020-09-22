@@ -67,7 +67,7 @@ def make_dataframes(score_data, edo=12):
     phases['f6 Phase'] = [180 if x < -179 else x for x in phases['f6 Phase']]
     quantized_phases = {f'f{i} Quantized Phase' : [quantize_array(a.phase_dict()[f'f{i}'], quant=edo) for a in score_data] for i in range(1, edo//2 +1)}
     quantized_phases['f6 Quantized Phase'] = [180 if x < -179 else x for x in quantized_phases['f6 Quantized Phase']]
-    magnitudes = {f'f{i} Magnitude' : [np.around(a.mag_dict()[f'f{i}'], decimals=2) for a in score_data] for i in range(1, edo//2 + 1)}
+    magnitudes = {f'f{i} Magnitude' : [np.around(a.mag_dict()[f'f{i}'], decimals=2) for a in score_data] for i in range(0, edo//2 + 1)}
 
     master_dict = {**general_info, **phases, **quantized_phases, **magnitudes}
 
