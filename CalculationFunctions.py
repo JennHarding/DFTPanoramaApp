@@ -10,19 +10,19 @@ def parse_score(score_string, measure_nums=None):
     # if score_string in Corpus.music21_corpus:
     #     working_score = corpus.parse(score_string)
     if score_string in Corpus.mozSQs:
-        working_score = converter.parse(Corpus.corpus+Corpus.moz+score_string)
+        working_score = converter.parse(Corpus.my_corpus+Corpus.moz+score_string)
     elif score_string in Corpus.harbs:
-        working_score = converter.parse(Corpus.corpus+Corpus.harb+score_string)
+        working_score = converter.parse(Corpus.my_corpus+Corpus.harb+score_string)
     elif score_string in Corpus.mess_misc:
-        working_score = converter.parse(Corpus.corpus+Corpus.mess+score_string)
+        working_score = converter.parse(Corpus.my_corpus+Corpus.mess+score_string)
     # elif score_string in Corpus.meis:
-    #     working_score = converter.parse(Corpus.corpus+Corpus.mei+score_string)
+    #     working_score = converter.parse(Corpus.my_corpus+Corpus.mei+score_string)
     # elif score_string in Corpus.tests:
-    #     working_score = converter.parse(Corpus.corpus+Corpus.test+score_string)
+    #     working_score = converter.parse(Corpus.my_corpus+Corpus.test+score_string)
     # elif score_string in Corpus.elvis_corpus:
-    #     working_score = converter.parse(Corpus.corpus+Corpus.elvis+score_string)
+    #     working_score = converter.parse(Corpus.my_corpus+Corpus.elvis+score_string)
     elif score_string in Corpus.micros:
-        working_score = converter.parse(Corpus.corpus+Corpus.micro+score_string)
+        working_score = converter.parse(Corpus.my_corpus+Corpus.micro+score_string)
     if score_string in Corpus.CRIM:
         working_score = converter.parse(Corpus.CRIM_corpus + score_string)
     
@@ -121,6 +121,19 @@ def get_measure_number(score, offset):
     
     
 def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo=12):
+    """Collect the pc data from within a range (the window), convert that data to a dft_array class, then move the window over and do it again until the end of the piece/exerpt.
+
+    Args:
+        score (music21 Stream): The parsed score, now a music21 Stream object
+        beat_offset_list (list): List of all offsets from the beginning of the score that coincide with beats
+        window_size (integer): Length of the sliding window in beats
+        strategy (string): Onset, duration, or flat
+        log (bool, optional): Whether or not to apply logarithmic weighting to the pc content before applying the DFT. Defaults to True.
+        edo (int, optional): Number of equal divisions of the octave. Defaults to 12.
+
+    Returns:
+        list: List of custom dftArrayClass arrays that represent pcsets that have had the DFT applied. Each array represents the pc content of one sliding window.
+    """
     all_arrays = []
     for idx, window_begin in enumerate(beat_offset_list[:-window_size]):
         window_end = beat_offset_list[idx + window_size]
@@ -160,6 +173,14 @@ def sliding_window(score, beat_offset_list, window_size, strategy, log=True, edo
 
 
 def score_to_data(config):  
+    """This is the big, main function that takes us from the user inputs all the way to the numerical data.
+
+    Args:
+        config (tuple): Contains repertoire (string), excerpt (Boolean), measures (tuple with beginning and ending measures as integers), window size (integer), strategy (onset, duration, or flat), logarithmic weightning (Boolean), and edo (either 12 or 24)
+
+    Returns:
+        list: list of dft_array objects that represent pcsets that have had the DFT applied. Each dft_array represents the DFT of the pc content of one sliding window.
+    """
      
     repertoire, excerpt, measures, window, strat, log, edo = config
     parsed_score = parse_score(score_string=repertoire, measure_nums=measures)

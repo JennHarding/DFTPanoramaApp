@@ -210,11 +210,16 @@ class DataPage(tk.Frame):
         sub = fig.add_subplot(111)
         sub_left = fig.add_subplot(111)
         sub_right = sub_left.twinx()
+        sub_left.set_xlabel("X Axis")
+        sub_left.set_ylabel("Left Y Axis")
+        sub_right.set_ylabel("Right Y Axis")
+        fig.tight_layout()
+        
         
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
         canvas.get_tk_widget()
-        canvas.get_tk_widget().grid(row=4, column=0, sticky="we", columnspan=7)
+        canvas.get_tk_widget().grid(row=4, column=0, sticky="nswe", columnspan=7)
         
         toolbar_frame = tk.Frame(self)
         toolbar_frame.grid(row=3, column=0, sticky="w", columnspan=7)
@@ -255,6 +260,8 @@ class DataPage(tk.Frame):
             right.margins(x=0)
             right.tick_params(axis='y', length=0)
             right.set_yticklabels([])
+            left.set_xlabel("Window Number")
+            left.set_xticks(ticks=range(0, len(master_df[f'f{i} Phase']), 20))
             
         else:
             i = self.var
@@ -285,7 +292,8 @@ class DataPage(tk.Frame):
             left.grid(axis='x')
             left.margins(x=0)
             left.set_ylabel("Phase")
-            left.set_xlabel("Window")
+            left.set_xlabel("Window Number")
+            left.set_xticks(ticks=range(0, len(master_df[f'f{i} Phase']), 20))
 
             left.legend(loc="lower center", 
                         bbox_to_anchor=(0.5, 1.02), 
@@ -301,7 +309,7 @@ class DataPage(tk.Frame):
     def make_empty_dataframe(self):
         empty_df = pd.DataFrame({})
         frame = tk.Frame(self)
-        frame.grid(row=5, column=0, sticky="we", columnspan=7)
+        frame.grid(row=6, column=0, sticky="we", columnspan=7)
         pt = Table(frame, showtoolbar=True, showstatusbar=True, dataframe=empty_df)
         pt.show()
         
@@ -398,6 +406,10 @@ class PhaseComparisonPage(tk.Frame):
         fig = Figure(figsize=(10,2.5))
         sub_left = fig.add_subplot(111)
         sub_right = sub_left.twinx()
+        sub_left.set_xlabel("X Axis")
+        sub_left.set_ylabel("Left Y Axis")
+        sub_right.set_ylabel("Right Y Axis")
+        fig.tight_layout()
         
         canvas = FigureCanvasTkAgg(fig, self)
         canvas.draw()
@@ -464,6 +476,7 @@ class PhaseComparisonPage(tk.Frame):
                         master_df[f'f{i} Phase'],
                         # color=vis.xkcd_colors[f'f{i}_colors'][1],
                         color=vis.hex_colors[f'f{i}_colors'][1],
+                        alpha=0.5,
                         label=f'f{i} Phase',
                         )
         
@@ -471,39 +484,59 @@ class PhaseComparisonPage(tk.Frame):
         left.grid(axis='x')
         left.margins(x=0)
         left.set_ylabel("Phase")
-        left.set_xlabel("Window")
+        left.set_xlabel("Window Number")
+        left.set_xticks(ticks=range(0, len(master_df[f'f{i} Phase']), 20))
         
-        left.legend(loc="upper right", 
-            bbox_to_anchor=(-0.06, 1), 
+        # left.legend(loc="upper right", 
+        #     bbox_to_anchor=(-0.06, 1), 
+        #     borderaxespad=0, 
+        #     fancybox=True, 
+        #     shadow=True, 
+        #     prop={'size': 7}, 
+        #     ncol=1
+        #     )
+        
+        left.legend(loc="lower left", 
+            bbox_to_anchor=(0, 1.02), 
             borderaxespad=0, 
             fancybox=True, 
             shadow=True, 
             prop={'size': 7}, 
-            ncol=1
-            )
+            ncol=3
+            )  
         
         right.plot(range(len(master_df[f'f{x} Phase'])), 
                    phase_index_df['Normalized Index'],
                     # [self.fix_index(phaseIndex=p_idx) for p_idx in find_index], 
                     # color=vis.xkcd_colors[f'f{i}_colors'][0],
                     color='black',
-                    label='X+Y-Z'
+                    label='Tonal Index'
                     )
         right.grid(b=False)
         right.margins(x=0) 
-        right.set_ylabel("Phase Index")        
+        right.set_ylabel("Tonal Index")        
         
-        right.legend(loc="upper left", 
-                     bbox_to_anchor=(1.04, 1),  
-                     borderaxespad=0,  
-                     fancybox=True, 
-                     shadow=True, 
-                     prop={'size': 7}, 
-                     ncol=1
-                     )
+        # right.legend(loc="upper left", 
+        #              bbox_to_anchor=(1.05, 1),  
+        #              borderaxespad=0,  
+        #              fancybox=True, 
+        #              shadow=True, 
+        #              prop={'size': 7}, 
+        #              ncol=1
+        #              )
+        
+        right.legend(loc="lower right", 
+            bbox_to_anchor=(1, 1.02), 
+            borderaxespad=0, 
+            fancybox=True, 
+            shadow=True, 
+            prop={'size': 7}, 
+            ncol=2
+            )    
 
         canvas.draw()
-        
+
+    
         
     def make_data(self, table, x, y, z):
         global master_df

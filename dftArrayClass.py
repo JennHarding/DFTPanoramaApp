@@ -2,7 +2,16 @@ import numpy as np
 
 
 class dft_array(object):
+    """[summary]
+
+    Args:
+        array (list): List that indicates the number of each pc present
+        measure_range (tuple, optional): Beginning and ending measure of window as integers. Defaults to None.
+        log_weight (bool, optional): Determines whether logarithmic weighting is applied. Defaults to True.
+    """
+
     def __init__(self, array, measure_range=None, log_weight=True):
+
         self.original_array = array
         self.measure_range = measure_range
         if measure_range is not None:
