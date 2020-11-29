@@ -2,7 +2,7 @@ import numpy as np
 
 
 class dft_array(object):
-    """[summary]
+    """DFT array object.
 
     Args:
         array (list): List that indicates the number of each pc present
